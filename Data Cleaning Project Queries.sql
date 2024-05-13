@@ -1,6 +1,6 @@
--- DATA CLEANING
+-- DATA CLEANING QUERIES
 
- SELECT * FROM world_layoffs.layoffs;
+SELECT * FROM world_layoffs.layoffs;
 
 CREATE TABLE IF NOT EXISTS layoffs_stage
 LIKE world_layoffs.layoffs;
@@ -11,16 +11,19 @@ INSERT world_layoffs.layoffs_stage
 SELECT * 
 FROM world_layoffs.layoffs;
 
--- 1. REMOVE DUPLICATES
 
+-- 1. REMOVE DUPLICATES
 
 WITH duplicate_cte AS 
 (
 SELECT *,
 ROW_NUMBER() OVER(
-PARTITION BY company, location, industry, total_laid_off, percentage_laid_off, `date` , stage, country, funds_raised_millions) AS row_num 
-FROM world_layoffs.layoffs_stage
-)
+PARTITION BY company, 
+	location, industry, 
+	total_laid_off, percentage_laid_off, 
+	`date` , stage, country, 
+	funds_raised_millions) AS row_num 
+FROM world_layoffs.layoffs_stage)
 SELECT * 
 FROM duplicate_cte
 WHERE row_num > 1;
@@ -54,6 +57,8 @@ FROM layoffs_stage2
 WHERE row_num > 1;
 
 SELECT * FROM layoffs_stage2;
+
+
 
 -- 2. STANDARDIZE THE DATA
 
@@ -98,7 +103,7 @@ SET `date` = STR_TO_DATE(`date`, '%m/%d/%Y')
 ALTER TABLE layoffs_stage2
 MODIFY COLUMN `date` DATE;
 
---3. Dealing with the NULLS
+--3. DEALING WITH THE NULLS
 
 SELECT * FROM  layoffs_stage2
 WHERE total_laid_off IS NULL
@@ -131,8 +136,7 @@ WHERE (t1.industry IS NULL OR t1.industry  = '')
 AND t2.industry IS NOT NULL;
 
 
--- 4. Remove Any Irrelavant Columns
-
+-- 4. REMOVE ANY IRRELAVANT COLUMNS
 
 SELECT * FROM  layoffs_stage2;
 
