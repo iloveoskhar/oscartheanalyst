@@ -1,5 +1,5 @@
 -- DATA CLEANING QUERIES
-
+-----------------------------------------------------------------------
 SELECT * FROM world_layoffs.layoffs;
 
 CREATE TABLE IF NOT EXISTS layoffs_stage
@@ -11,9 +11,9 @@ INSERT world_layoffs.layoffs_stage
 SELECT * 
 FROM world_layoffs.layoffs;
 
-
+-------------------------------------------------------------------------
 -- 1. REMOVE DUPLICATES
-
+--------------------------------------------------------------------------
 WITH duplicate_cte AS 
 (
 SELECT *,
@@ -59,9 +59,9 @@ WHERE row_num > 1;
 SELECT * FROM layoffs_stage2;
 
 
-
+-------------------------------------------------------------------------------------
 -- 2. STANDARDIZE THE DATA
-
+-------------------------------------------------------------------------------------
 SELECT company, TRIM(company)
 FROM layoffs_stage2;
 
@@ -92,8 +92,10 @@ UPDATE layoffs_stage2
 SET country = TRIM(TRAILING '.' FROM country)
 WHERE country LIKE 'United States%';
 
--- Changing the date column from a 'text type' to a 'date type'
 
+--------------------------------------------------------------------------------------
+-- Changing the date column from a 'text type' to a 'date type'
+--------------------------------------------------------------------------------------
 SELECT  `date`, STR_TO_DATE(`date`, '%m/%d/%Y')
 FROM layoffs_stage2;
 
@@ -103,8 +105,10 @@ SET `date` = STR_TO_DATE(`date`, '%m/%d/%Y')
 ALTER TABLE layoffs_stage2
 MODIFY COLUMN `date` DATE;
 
---3. DEALING WITH THE NULLS
 
+----------------------------------------------------------------------------------------
+--3. DEALING WITH THE NULLS
+----------------------------------------------------------------------------------------
 SELECT * FROM  layoffs_stage2
 WHERE total_laid_off IS NULL
 AND percentage_laid_off IS NULL;
@@ -126,7 +130,8 @@ FROM layoffs_stage2 t1
 JOIN layoffs_stage2 t2
 ON t1.company = t2.company
 AND t1.location = t2.location
-WHERE (t1.industry IS NULL OR t1.industry ='') AND t2.industry IS NOT NULL;
+WHERE (t1.industry IS NULL OR t1.industry ='') 
+	AND t2.industry IS NOT NULL;
 
 UPDATE layoffs_stage2 t1
 JOIN layoffs_stage2 t2
@@ -135,9 +140,9 @@ SET t1.industry = t2.industry
 WHERE (t1.industry IS NULL OR t1.industry  = '') 
 AND t2.industry IS NOT NULL;
 
-
+-----------------------------------------------------------------------------
 -- 4. REMOVE ANY IRRELAVANT COLUMNS
-
+-----------------------------------------------------------------------------
 SELECT * FROM  layoffs_stage2;
 
 SELECT * FROM  layoffs_stage2
